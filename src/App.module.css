@@ -1,0 +1,18 @@
+
+.dayGrid {
+    display: grid;
+    grid-template-areas:
+    'buttons buttons'
+    'dayI dayR';
+}
+.dayButtons {
+grid-area: buttons;
+}
+
+.dayInput {
+    grid-area: dayI;
+}
+
+.dayResult {
+    grid-area: dayR;
+}
