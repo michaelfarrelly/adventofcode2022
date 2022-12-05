@@ -1,12 +1,11 @@
-
 .dayGrid {
     display: grid;
     grid-template-areas:
-    'buttons buttons'
-    'dayI dayR';
+        "buttons buttons"
+        "dayI dayR";
 }
 .dayButtons {
-grid-area: buttons;
+    grid-area: buttons;
 }
 
 .dayInput {

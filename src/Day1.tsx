@@ -60,55 +60,48 @@ Find the top three Elves carrying the most Calories. How many Calories are those
 
 */
 
-const testData =
-  "1000\n2000\n3000\n\n4000\n\n5000\n6000\n\n7000\n8000\n9000\n\n10000";
+const testData = "1000\n2000\n3000\n\n4000\n\n5000\n6000\n\n7000\n8000\n9000\n\n10000";
 
 export function Day1() {
-  const [input, setInput] = useState<string>(testData);
-  const [result, setResult] = useState<string>("");
+    const [input, setInput] = useState<string>(testData);
+    const [result, setResult] = useState<string>("");
 
-  const onRun = React.useCallback(() => {
-    const elfCarries = input.split("\n\n");
-    const elfTotals = elfCarries
-      .map((carry, i) => {
-        const carryItems = carry.split("\n").map((c) => parseInt(c));
-        const sumItems = carryItems.reduce((prev, curr) => {
-          return prev + curr;
+    const onRun = React.useCallback(() => {
+        const elfCarries = input.split("\n\n");
+        const elfTotals = elfCarries
+            .map((carry, i) => {
+                const carryItems = carry.split("\n").map(c => parseInt(c));
+                const sumItems = carryItems.reduce((prev, curr) => {
+                    return prev + curr;
+                }, 0);
+                return { index: i, carries: carryItems, total: sumItems };
+            })
+            .sort((a, b) => {
+                return b.total - a.total;
+            });
+
+        // part 2
+        const top3 = elfTotals.slice(0, 3).reduce((prev, curr) => {
+            return prev + curr.total;
         }, 0);
-        return { index: i, carries: carryItems, total: sumItems };
-      })
-      .sort((a, b) => {
-        return b.total - a.total;
-      });
 
-    // part 2
-    const top3 = elfTotals.slice(0, 3).reduce((prev, curr) => {
-      return prev + curr.total;
-    }, 0);
+        setResult(`Top: ${elfTotals[0].index} - ${elfTotals[0].total}, Top3 carry: ${top3}`);
+    }, [input]);
 
-    setResult(
-      `Top: ${elfTotals[0].index} - ${elfTotals[0].total}, Top3 carry: ${top3}`
+    return (
+        <>
+            <div className="App">
+                <h1>Day 1</h1>
+            </div>
+            <div>
+                <textarea value={input} rows={20} onChange={e => setInput(e.currentTarget.value)}></textarea>
+            </div>
+            <div>
+                <button onClick={onRun}>Run</button>
+            </div>
+            <div>
+                <textarea value={result} rows={20}></textarea>
+            </div>
+        </>
     );
-  }, [input]);
-
-  return (
-    <>
-      <div className="App">
-        <h1>Day 1</h1>
-      </div>
-      <div>
-        <textarea
-          value={input}
-          rows={20}
-          onChange={(e) => setInput(e.currentTarget.value)}
-        ></textarea>
-      </div>
-      <div>
-        <button onClick={onRun}>Run</button>
-      </div>
-      <div>
-        <textarea value={result} rows={20}></textarea>
-      </div>
-    </>
-  );
 }

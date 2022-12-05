@@ -122,126 +122,122 @@ Before the rearrangement process finishes, update your simulation so that the El
 */
 
 interface Item {
-  value: string;
+    value: string;
 }
 
 interface Stack {
-  items: Item[];
+    items: Item[];
 }
 
 interface Model {
-  stacks: Stack[];
+    stacks: Stack[];
 }
 
 function buildModel(lines: string[]): Model {
-  // last line tells how many stacks
-  const stackLine = lines[lines.length - 1].trimEnd();
-  const stackCount = parseInt(stackLine[stackLine.length - 1]);
-  const stacks: Stack[] = [];
-  for (let j = 0; j < stackCount; j++) {
-    stacks.push({ items: [] });
-  }
-  for (let i = 0; i < lines.length - 1; i++) {
+    // last line tells how many stacks
+    const stackLine = lines[lines.length - 1].trimEnd();
+    const stackCount = parseInt(stackLine[stackLine.length - 1]);
+    const stacks: Stack[] = [];
     for (let j = 0; j < stackCount; j++) {
-      const ordinal = stackLine.indexOf(`${j + 1}`);
-
-      if (lines[i].length > ordinal && lines[i][ordinal] !== " ") {
-        stacks[j].items.push({ value: lines[i][ordinal] });
-      }
+        stacks.push({ items: [] });
     }
-  }
+    for (let i = 0; i < lines.length - 1; i++) {
+        for (let j = 0; j < stackCount; j++) {
+            const ordinal = stackLine.indexOf(`${j + 1}`);
 
-  return { stacks: stacks };
+            if (lines[i].length > ordinal && lines[i][ordinal] !== " ") {
+                stacks[j].items.push({ value: lines[i][ordinal] });
+            }
+        }
+    }
+
+    return { stacks: stacks };
 }
 function runMoves(model: Model, moveLines: string[], mode: "shift" | "pop") {
-  for (const move of moveLines) {
-    const parts = move.split(" ");
-    const qty = parseInt(parts[1]);
-    const fromLoc = parseInt(parts[3]) - 1;
-    const toLoc = parseInt(parts[5]) - 1;
+    for (const move of moveLines) {
+        const parts = move.split(" ");
+        const qty = parseInt(parts[1]);
+        const fromLoc = parseInt(parts[3]) - 1;
+        const toLoc = parseInt(parts[5]) - 1;
 
-    const hold = [];
-    for (let i = 0; i < qty; i++) {
-      const x = model.stacks[fromLoc].items.shift();
-      console.log(`moving`, x, fromLoc, toLoc, qty);
-      hold.push(x);
-    }
-    for (let i = 0; i < qty; i++) {
-      if (hold.length > 0) {
-        const x = mode === "pop" ? hold.pop() : hold.shift();
-        console.log(`dropping`, x, fromLoc, toLoc, qty);
-        if (x) {
-          model.stacks[toLoc].items.unshift(x);
+        const hold = [];
+        for (let i = 0; i < qty; i++) {
+            const x = model.stacks[fromLoc].items.shift();
+            console.log(`moving`, x, fromLoc, toLoc, qty);
+            hold.push(x);
         }
-      }
+        for (let i = 0; i < qty; i++) {
+            if (hold.length > 0) {
+                const x = mode === "pop" ? hold.pop() : hold.shift();
+                console.log(`dropping`, x, fromLoc, toLoc, qty);
+                if (x) {
+                    model.stacks[toLoc].items.unshift(x);
+                }
+            }
+        }
     }
-  }
-  return model;
+    return model;
 }
 
 function topOfStack(model: Model): string {
-  return model.stacks.map((s) => s.items[0].value).join("");
+    return model.stacks.map(s => s.items[0].value).join("");
 }
 
 const testData =
-  "    [D]    \n[N] [C]    \n[Z] [M] [P]\n 1   2   3 \n\nmove 1 from 2 to 1\nmove 3 from 1 to 3\nmove 2 from 2 to 1\nmove 1 from 1 to 2";
+    "    [D]    \n[N] [C]    \n[Z] [M] [P]\n 1   2   3 \n\nmove 1 from 2 to 1\nmove 3 from 1 to 3\nmove 2 from 2 to 1\nmove 1 from 1 to 2";
 
 export function Day5() {
-  const [input, setInput] = useState<string>(testData);
-  const [result, setResult] = useState<string>("");
+    const [input, setInput] = useState<string>(testData);
+    const [result, setResult] = useState<string>("");
 
-  const onRunPart1 = React.useCallback(() => {
-    const lines = input.split("\n");
-    // find first line with move
-    const firstMoveLine = lines.findIndex((v) => v.startsWith("move"));
-    const modelLines = lines.slice(0, firstMoveLine - 1);
-    const moveLines = lines.slice(firstMoveLine);
-    const model = buildModel(modelLines);
-    console.log(`lines`, modelLines, moveLines, model);
+    const onRunPart1 = React.useCallback(() => {
+        const lines = input.split("\n");
+        // find first line with move
+        const firstMoveLine = lines.findIndex(v => v.startsWith("move"));
+        const modelLines = lines.slice(0, firstMoveLine - 1);
+        const moveLines = lines.slice(firstMoveLine);
+        const model = buildModel(modelLines);
+        console.log(`lines`, modelLines, moveLines, model);
 
-    const result = runMoves(model, moveLines, "shift");
-    const result1 = topOfStack(result);
+        const result = runMoves(model, moveLines, "shift");
+        const result1 = topOfStack(result);
 
-    setResult(`Total Score: ${result1}`);
-  }, [input]);
+        setResult(`Total Score: ${result1}`);
+    }, [input]);
 
-  const onRunPart2 = React.useCallback(() => {
-    const lines = input.split("\n");
-    // find first line with move
-    const firstMoveLine = lines.findIndex((v) => v.startsWith("move"));
-    const modelLines = lines.slice(0, firstMoveLine - 1);
-    const moveLines = lines.slice(firstMoveLine);
-    const model = buildModel(modelLines);
-    console.log(`lines`, modelLines, moveLines, model);
+    const onRunPart2 = React.useCallback(() => {
+        const lines = input.split("\n");
+        // find first line with move
+        const firstMoveLine = lines.findIndex(v => v.startsWith("move"));
+        const modelLines = lines.slice(0, firstMoveLine - 1);
+        const moveLines = lines.slice(firstMoveLine);
+        const model = buildModel(modelLines);
+        console.log(`lines`, modelLines, moveLines, model);
 
-    const result = runMoves(model, moveLines, "pop");
-    const result1 = topOfStack(result);
+        const result = runMoves(model, moveLines, "pop");
+        const result1 = topOfStack(result);
 
-    setResult(`Total Score: ${result1}`);
-  }, [input]);
+        setResult(`Total Score: ${result1}`);
+    }, [input]);
 
-  return (
-    <>
-      <div className="App">
-        <h1>Day 5</h1>
-      </div>
+    return (
+        <>
+            <div className="App">
+                <h1>Day 5</h1>
+            </div>
 
-      <div className={styles.dayGrid}>
-        <div className={styles.dayButtons}>
-          <button onClick={onRunPart1}>Run (Part 1)</button>
-          <button onClick={onRunPart2}>Run (Part 2)</button>
-        </div>
-        <div className={styles.dayInput}>
-          <textarea
-            value={input}
-            rows={10}
-            onChange={(e) => setInput(e.currentTarget.value)}
-          ></textarea>
-        </div>
-        <div className={styles.dayResult}>
-          <textarea value={result} rows={10}></textarea>
-        </div>
-      </div>
-    </>
-  );
+            <div className={styles.dayGrid}>
+                <div className={styles.dayButtons}>
+                    <button onClick={onRunPart1}>Run (Part 1)</button>
+                    <button onClick={onRunPart2}>Run (Part 2)</button>
+                </div>
+                <div className={styles.dayInput}>
+                    <textarea value={input} rows={10} onChange={e => setInput(e.currentTarget.value)}></textarea>
+                </div>
+                <div className={styles.dayResult}>
+                    <textarea value={result} rows={10}></textarea>
+                </div>
+            </div>
+        </>
+    );
 }

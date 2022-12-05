@@ -101,120 +101,106 @@ What is the sum of the priorities of those item types?
 */
 
 function commonChar(a: string, b: string): string[] {
-  const commons = [
-    ...new Set([...a].filter((aItem) => b.includes(aItem))).values(),
-  ];
-  return commons;
+    const commons = [...new Set([...a].filter(aItem => b.includes(aItem))).values()];
+    return commons;
 }
 
 function commonChar3(a: string, b: string, c: string): string[] {
-  const commons = [
-    ...new Set(
-      [...a].filter((aItem) => b.includes(aItem) && c.includes(aItem))
-    ).values(),
-  ];
-  return commons;
+    const commons = [...new Set([...a].filter(aItem => b.includes(aItem) && c.includes(aItem))).values()];
+    return commons;
 }
 
 function getPriority(a: string): number {
-  const charCode = a.charCodeAt(0);
-  window.console.log(`cc`, a, charCode);
-  if (charCode >= 97) {
-    // a
-    return charCode - 96;
-  }
-  return charCode - 65 + 27;
+    const charCode = a.charCodeAt(0);
+    window.console.log(`cc`, a, charCode);
+    if (charCode >= 97) {
+        // a
+        return charCode - 96;
+    }
+    return charCode - 65 + 27;
 }
 
 function groupInto<T>(source: T[], items: number): T[][] {
-  const groups: T[][] = [];
-  let next: T[] = [];
-  for (let i = 0; i < source.length; i++) {
-    next.push(source[i]);
-    if (next.length >= items) {
-      groups.push(next);
-      next = [];
+    const groups: T[][] = [];
+    let next: T[] = [];
+    for (let i = 0; i < source.length; i++) {
+        next.push(source[i]);
+        if (next.length >= items) {
+            groups.push(next);
+            next = [];
+        }
     }
-  }
-  return groups;
+    return groups;
 }
 
 const testData =
-  "vJrwpWtwJgWrhcsFMMfFFhFp\njqHRNqRjqzjGDLGLrsFMfFZSrLrFZsSL\nPmmdzqPrVvPwwTWBwg\nwMqvLMZHhHMvwLHjbvcjnnSBnvTQFn\nttgJtRGJQctTZtZT\nCrZsJsPPZsGzwwsLwLmpwMDw";
+    "vJrwpWtwJgWrhcsFMMfFFhFp\njqHRNqRjqzjGDLGLrsFMfFZSrLrFZsSL\nPmmdzqPrVvPwwTWBwg\nwMqvLMZHhHMvwLHjbvcjnnSBnvTQFn\nttgJtRGJQctTZtZT\nCrZsJsPPZsGzwwsLwLmpwMDw";
 
 export function Day3() {
-  const [input, setInput] = useState<string>(testData);
-  const [result, setResult] = useState<string>("");
+    const [input, setInput] = useState<string>(testData);
+    const [result, setResult] = useState<string>("");
 
-  const onRunPart1 = React.useCallback(() => {
-    const sacks = input.split("\n");
-    const totals = sacks
-      .map((sack, i) => {
-        if (sack.length < 1) {
-          return 0;
-        }
+    const onRunPart1 = React.useCallback(() => {
+        const sacks = input.split("\n");
+        const totals = sacks
+            .map((sack, i) => {
+                if (sack.length < 1) {
+                    return 0;
+                }
 
-        const lenHalf = sack.length / 2;
-        const part1 = sack.slice(0, lenHalf);
-        const part2 = sack.slice(lenHalf);
-        const commons = commonChar(part1, part2);
-        const priority = commons
-          .map((c) => getPriority(c))
-          .reduce((prev, curr) => prev + curr, 0);
-        window.console.log(`commons`, commons, priority);
-        return priority;
-      })
-      .reduce((prev, curr) => prev + curr, 0);
+                const lenHalf = sack.length / 2;
+                const part1 = sack.slice(0, lenHalf);
+                const part2 = sack.slice(lenHalf);
+                const commons = commonChar(part1, part2);
+                const priority = commons.map(c => getPriority(c)).reduce((prev, curr) => prev + curr, 0);
+                window.console.log(`commons`, commons, priority);
+                return priority;
+            })
+            .reduce((prev, curr) => prev + curr, 0);
 
-    setResult(`Total Score: ${totals}`);
-  }, [input]);
+        setResult(`Total Score: ${totals}`);
+    }, [input]);
 
-  const onRunPart2 = React.useCallback(() => {
-    const sacks = groupInto(input.split("\n"), 3);
-    window.console.log(sacks);
-    const totals = sacks
-      .map((sack, i) => {
-        if (sack.length !== 3) {
-          return 0;
-        }
+    const onRunPart2 = React.useCallback(() => {
+        const sacks = groupInto(input.split("\n"), 3);
+        window.console.log(sacks);
+        const totals = sacks
+            .map((sack, i) => {
+                if (sack.length !== 3) {
+                    return 0;
+                }
 
-        const part1 = sack[0];
-        const part2 = sack[1];
-        const part3 = sack[2];
-        const commons = commonChar3(part1, part2, part3);
-        const priority = commons
-          .map((c) => getPriority(c))
-          .reduce((prev, curr) => prev + curr, 0);
-        window.console.log(`commons`, commons, priority);
-        return priority;
-      })
-      .reduce((prev, curr) => prev + curr, 0);
+                const part1 = sack[0];
+                const part2 = sack[1];
+                const part3 = sack[2];
+                const commons = commonChar3(part1, part2, part3);
+                const priority = commons.map(c => getPriority(c)).reduce((prev, curr) => prev + curr, 0);
+                window.console.log(`commons`, commons, priority);
+                return priority;
+            })
+            .reduce((prev, curr) => prev + curr, 0);
 
-    setResult(`Total Score: ${totals}`);
-  }, [input]);
+        setResult(`Total Score: ${totals}`);
+    }, [input]);
 
-  return (
-    <>
-      <div className="App">
-        <h1>Day 3</h1>
-      </div>
+    return (
+        <>
+            <div className="App">
+                <h1>Day 3</h1>
+            </div>
 
-      <div className={styles.dayGrid}>
-        <div className={styles.dayButtons}>
-          <button onClick={onRunPart1}>Run (Part 1)</button>
-          <button onClick={onRunPart2}>Run (Part 2)</button>
-        </div>
-        <div className={styles.dayInput}>
-          <textarea
-            value={input}
-            rows={10}
-            onChange={(e) => setInput(e.currentTarget.value)}
-          ></textarea>
-        </div>
-        <div className={styles.dayResult}>
-          <textarea value={result} rows={10}></textarea>
-        </div>
-      </div>
-    </>
-  );
+            <div className={styles.dayGrid}>
+                <div className={styles.dayButtons}>
+                    <button onClick={onRunPart1}>Run (Part 1)</button>
+                    <button onClick={onRunPart2}>Run (Part 2)</button>
+                </div>
+                <div className={styles.dayInput}>
+                    <textarea value={input} rows={10} onChange={e => setInput(e.currentTarget.value)}></textarea>
+                </div>
+                <div className={styles.dayResult}>
+                    <textarea value={result} rows={10}></textarea>
+                </div>
+            </div>
+        </>
+    );
 }

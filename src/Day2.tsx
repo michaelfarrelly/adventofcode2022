@@ -70,161 +70,143 @@ type RPSValue = "Rock" | "Paper" | "Scissors" | "Draw";
 type ResultRequired = "Win" | "Lose" | "Draw";
 
 const toValuePart1 = (input: string): RPSValue => {
-  if (input === "A" || input === "X") {
+    if (input === "A" || input === "X") {
+        return "Rock";
+    } else if (input === "B" || input === "Y") {
+        return "Paper";
+    } else if (input === "C" || input === "Z") {
+        return "Scissors";
+    }
     return "Rock";
-  } else if (input === "B" || input === "Y") {
-    return "Paper";
-  } else if (input === "C" || input === "Z") {
-    return "Scissors";
-  }
-  return "Rock";
 };
 
 const toResultRequired = (input: string): ResultRequired => {
-  if (input === "X") {
-    return "Lose";
-  } else if (input === "Y") {
-    return "Draw";
-  }
-  return "Win";
+    if (input === "X") {
+        return "Lose";
+    } else if (input === "Y") {
+        return "Draw";
+    }
+    return "Win";
 };
 
 const getWinner = (a: RPSValue, b: RPSValue): RPSValue => {
-  if (a === "Rock" && b === "Scissors") {
-    return a;
-  } else if (a === "Rock" && b === "Paper") {
-    return b;
-  } else if (a === "Paper" && b === "Rock") {
-    return a;
-  } else if (a === "Paper" && b === "Scissors") {
-    return b;
-  } else if (a === "Scissors" && b === "Paper") {
-    return a;
-  } else if (a === "Scissors" && b === "Rock") {
-    return b;
-  }
-  return "Draw";
+    if (a === "Rock" && b === "Scissors") {
+        return a;
+    } else if (a === "Rock" && b === "Paper") {
+        return b;
+    } else if (a === "Paper" && b === "Rock") {
+        return a;
+    } else if (a === "Paper" && b === "Scissors") {
+        return b;
+    } else if (a === "Scissors" && b === "Paper") {
+        return a;
+    } else if (a === "Scissors" && b === "Rock") {
+        return b;
+    }
+    return "Draw";
 };
 
 export function Day2() {
-  const [input, setInput] = useState<string>(testData);
-  const [result, setResult] = useState<string>("");
+    const [input, setInput] = useState<string>(testData);
+    const [result, setResult] = useState<string>("");
 
-  const onRunPart1 = React.useCallback(() => {
-    const rounds = input.split("\n");
-    const totals = rounds
-      .map((roundMoves, i) => {
-        if (roundMoves.length < 3) {
-          return 0;
-        }
+    const onRunPart1 = React.useCallback(() => {
+        const rounds = input.split("\n");
+        const totals = rounds
+            .map((roundMoves, i) => {
+                if (roundMoves.length < 3) {
+                    return 0;
+                }
 
-        const oppMove = toValuePart1(roundMoves[0]);
-        const myMove = toValuePart1(roundMoves[2]);
-        const winner = getWinner(oppMove, myMove);
-        let score = 0;
-        score += winner === myMove ? 6 : winner === "Draw" ? 3 : 0;
-        score +=
-          myMove === "Rock"
-            ? 1
-            : myMove === "Paper"
-            ? 2
-            : myMove === "Scissors"
-            ? 3
-            : 0;
-        //window.console.log(`winner is`, winner, oppMove, myMove, score);
-        return score;
-      })
-      .reduce((prev, curr) => prev + curr, 0);
+                const oppMove = toValuePart1(roundMoves[0]);
+                const myMove = toValuePart1(roundMoves[2]);
+                const winner = getWinner(oppMove, myMove);
+                let score = 0;
+                score += winner === myMove ? 6 : winner === "Draw" ? 3 : 0;
+                score += myMove === "Rock" ? 1 : myMove === "Paper" ? 2 : myMove === "Scissors" ? 3 : 0;
+                //window.console.log(`winner is`, winner, oppMove, myMove, score);
+                return score;
+            })
+            .reduce((prev, curr) => prev + curr, 0);
 
-    // part 2
-    // TBD
+        // part 2
+        // TBD
 
-    setResult(`Total Score: ${totals}`);
-  }, [input]);
+        setResult(`Total Score: ${totals}`);
+    }, [input]);
 
-  const onRunPart2 = React.useCallback(() => {
-    const rounds = input.split("\n");
-    const totals = rounds
-      .map((roundMoves, i) => {
-        if (roundMoves.length < 3) {
-          return 0;
-        }
+    const onRunPart2 = React.useCallback(() => {
+        const rounds = input.split("\n");
+        const totals = rounds
+            .map((roundMoves, i) => {
+                if (roundMoves.length < 3) {
+                    return 0;
+                }
 
-        const oppMove = toValuePart1(roundMoves[0]);
-        const requiredResult = toResultRequired(roundMoves[2]);
-        let myMove: RPSValue = "Draw";
-        if (requiredResult === "Win") {
-          if (oppMove == "Rock") {
-            myMove = "Paper";
-          }
-          if (oppMove == "Paper") {
-            myMove = "Scissors";
-          }
-          if (oppMove == "Scissors") {
-            myMove = "Rock";
-          }
-        } else if (requiredResult === "Lose") {
-          if (oppMove == "Rock") {
-            myMove = "Scissors";
-          }
-          if (oppMove == "Paper") {
-            myMove = "Rock";
-          }
-          if (oppMove == "Scissors") {
-            myMove = "Paper";
-          }
-        } else if (requiredResult === "Draw") {
-          if (oppMove == "Rock") {
-            myMove = "Rock";
-          }
-          if (oppMove == "Paper") {
-            myMove = "Paper";
-          }
-          if (oppMove == "Scissors") {
-            myMove = "Scissors";
-          }
-        }
-        const winner = getWinner(oppMove, myMove);
-        let score = 0;
-        score += winner === myMove ? 6 : winner === "Draw" ? 3 : 0;
-        score +=
-          myMove === "Rock"
-            ? 1
-            : myMove === "Paper"
-            ? 2
-            : myMove === "Scissors"
-            ? 3
-            : 0;
-        //window.console.log(`winner is`, winner, oppMove, myMove, score);
-        return score;
-      })
-      .reduce((prev, curr) => prev + curr, 0);
+                const oppMove = toValuePart1(roundMoves[0]);
+                const requiredResult = toResultRequired(roundMoves[2]);
+                let myMove: RPSValue = "Draw";
+                if (requiredResult === "Win") {
+                    if (oppMove == "Rock") {
+                        myMove = "Paper";
+                    }
+                    if (oppMove == "Paper") {
+                        myMove = "Scissors";
+                    }
+                    if (oppMove == "Scissors") {
+                        myMove = "Rock";
+                    }
+                } else if (requiredResult === "Lose") {
+                    if (oppMove == "Rock") {
+                        myMove = "Scissors";
+                    }
+                    if (oppMove == "Paper") {
+                        myMove = "Rock";
+                    }
+                    if (oppMove == "Scissors") {
+                        myMove = "Paper";
+                    }
+                } else if (requiredResult === "Draw") {
+                    if (oppMove == "Rock") {
+                        myMove = "Rock";
+                    }
+                    if (oppMove == "Paper") {
+                        myMove = "Paper";
+                    }
+                    if (oppMove == "Scissors") {
+                        myMove = "Scissors";
+                    }
+                }
+                const winner = getWinner(oppMove, myMove);
+                let score = 0;
+                score += winner === myMove ? 6 : winner === "Draw" ? 3 : 0;
+                score += myMove === "Rock" ? 1 : myMove === "Paper" ? 2 : myMove === "Scissors" ? 3 : 0;
+                //window.console.log(`winner is`, winner, oppMove, myMove, score);
+                return score;
+            })
+            .reduce((prev, curr) => prev + curr, 0);
 
-    // part 2
-    // TBD
+        // part 2
+        // TBD
 
-    setResult(`Total Score: ${totals}`);
-  }, [input]);
+        setResult(`Total Score: ${totals}`);
+    }, [input]);
 
-  return (
-    <>
-      <div className="App">
-        <h1>Day 2</h1>
-      </div>
-      <div>
-        <textarea
-          value={input}
-          rows={20}
-          onChange={(e) => setInput(e.currentTarget.value)}
-        ></textarea>
-      </div>
-      <div>
-        <button onClick={onRunPart1}>Run (Part 1)</button>
-        <button onClick={onRunPart2}>Run (Part 2)</button>
-      </div>
-      <div>
-        <textarea value={result} rows={20}></textarea>
-      </div>
-    </>
-  );
+    return (
+        <>
+            <div className="App">
+                <h1>Day 2</h1>
+            </div>
+            <div>
+                <textarea value={input} rows={20} onChange={e => setInput(e.currentTarget.value)}></textarea>
+            </div>
+            <div>
+                <button onClick={onRunPart1}>Run (Part 1)</button>
+                <button onClick={onRunPart2}>Run (Part 2)</button>
+            </div>
+            <div>
+                <textarea value={result} rows={20}></textarea>
+            </div>
+        </>
+    );
 }
