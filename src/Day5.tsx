@@ -153,7 +153,7 @@ function buildModel(lines: string[]): Model {
 
   return { stacks: stacks };
 }
-function runMoves(model: Model, moveLines: string[]) {
+function runMoves(model: Model, moveLines: string[], mode: "shift" | "pop") {
   for (const move of moveLines) {
     const parts = move.split(" ");
     const qty = parseInt(parts[1]);
@@ -168,7 +168,7 @@ function runMoves(model: Model, moveLines: string[]) {
     }
     for (let i = 0; i < qty; i++) {
       if (hold.length > 0) {
-        const x = hold.pop(); // part 2
+        const x = mode === "pop" ? hold.pop() : hold.shift();
         console.log(`dropping`, x, fromLoc, toLoc, qty);
         if (x) {
           model.stacks[toLoc].items.unshift(x);
@@ -199,7 +199,22 @@ export function Day5() {
     const model = buildModel(modelLines);
     console.log(`lines`, modelLines, moveLines, model);
 
-    const result = runMoves(model, moveLines);
+    const result = runMoves(model, moveLines, "shift");
+    const result1 = topOfStack(result);
+
+    setResult(`Total Score: ${result1}`);
+  }, [input]);
+
+  const onRunPart2 = React.useCallback(() => {
+    const lines = input.split("\n");
+    // find first line with move
+    const firstMoveLine = lines.findIndex((v) => v.startsWith("move"));
+    const modelLines = lines.slice(0, firstMoveLine - 1);
+    const moveLines = lines.slice(firstMoveLine);
+    const model = buildModel(modelLines);
+    console.log(`lines`, modelLines, moveLines, model);
+
+    const result = runMoves(model, moveLines, "pop");
     const result1 = topOfStack(result);
 
     setResult(`Total Score: ${result1}`);
@@ -214,7 +229,7 @@ export function Day5() {
       <div className={styles.dayGrid}>
         <div className={styles.dayButtons}>
           <button onClick={onRunPart1}>Run (Part 1)</button>
-          <button onClick={onRunPart1}>Run (Part 2)</button>
+          <button onClick={onRunPart2}>Run (Part 2)</button>
         </div>
         <div className={styles.dayInput}>
           <textarea
