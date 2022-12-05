@@ -1,0 +1,38 @@
+.appGrid {
+    display: grid;
+    grid-template-areas:
+        "hdr hdr  hdr"
+        "nav page page"
+        "nav page page";
+}
+.appHeader {
+    grid-area: hdr;
+}
+
+.appNav {
+    grid-area: nav;
+    width: 150px;
+}
+
+.appPage {
+    grid-area: page;
+    width: 600px;
+}
+
+.dayGrid {
+    display: grid;
+    grid-template-areas:
+        "buttons buttons"
+        "dayI dayR";
+}
+.dayButtons {
+    grid-area: buttons;
+}
+
+.dayInput {
+    grid-area: dayI;
+}
+
+.dayResult {
+    grid-area: dayR;
+}

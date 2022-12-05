@@ -11,7 +11,7 @@ Description goes here
 const testData =
     "    [D]    \n[N] [C]    \n[Z] [M] [P]\n 1   2   3 \n\nmove 1 from 2 to 1\nmove 3 from 1 to 3\nmove 2 from 2 to 1\nmove 1 from 1 to 2";
 
-export function Day16() {
+export function Day14() {
     const [input, setInput] = useState<string>(testData);
     const [result, setResult] = useState<string>("");
 
@@ -30,7 +30,7 @@ export function Day16() {
     return (
         <>
             <div className="App">
-                <h1>Day 6</h1>
+                <h1>Day 14</h1>
             </div>
 
             <div className={styles.dayGrid}>

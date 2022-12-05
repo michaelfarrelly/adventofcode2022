@@ -30,7 +30,7 @@ export function Day7() {
     return (
         <>
             <div className="App">
-                <h1>Day 6</h1>
+                <h1>Day 7</h1>
             </div>
 
             <div className={styles.dayGrid}>
