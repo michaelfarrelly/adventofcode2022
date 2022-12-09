@@ -84,6 +84,8 @@ function Layout() {
         <div className={styles.appGrid}>
             <div className={styles.appHeader}>
                 <h1>Advent of Code 2022</h1>
+                <h3>Michael Farrelly</h3>
+                <h3>Typescript - React - Vite</h3>
             </div>
             {/* A "layout route" is a good place to put markup you want to
             share across all the pages on your site, like navigation. */}
