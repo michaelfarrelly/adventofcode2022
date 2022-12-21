@@ -32,10 +32,19 @@ class Box {
             back: true,
             front: true
         };
+        this.exterior = {
+            up: false,
+            down: false,
+            left: false,
+            right: false,
+            back: false,
+            front: false
+        };
     }
     id: string;
     vertex: Vertex3;
     free: { up: boolean; down: boolean; left: boolean; right: boolean; back: boolean; front: boolean };
+    exterior: { up: boolean; down: boolean; left: boolean; right: boolean; back: boolean; front: boolean };
 }
 
 class Spatial3 {
@@ -187,50 +196,60 @@ class Spatial3 {
             b.free = { up, down, left, right, back, front };
             totalFree += freeSides;
         }
-        window.console.log(`minmax`, { minX, maxX, minY, maxY, minZ, maxZ }, { bbb: this.boxes });
+        window.console.log(`minmax`, { minX, maxX, minY, maxY, minZ, maxZ }, { bbb: this.boxes }, totalFree);
         // find internal holes.
 
-        for (let x = minX; x < maxX; x++) {
-            for (let y = minY; y < maxY; y++) {
-                for (let z = minZ; z < maxZ; z++) {
-                    // box at?
-                    const isBoxAt =
-                        this.boxes.filter(b => {
-                            return b.vertex.x == x && b.vertex.y == y && b.vertex.z == z;
-                        }).length === 1;
-                    if (!isBoxAt) {
-                        // is internal to other boxes?
-                        const up =
-                            this.boxes.filter(
-                                other => other.vertex.y == y + 1 && other.vertex.x == x && other.vertex.z == z
-                            ).length > 0;
-                        const down =
-                            this.boxes.filter(
-                                other => other.vertex.y == y - 1 && other.vertex.x == x && other.vertex.z == z
-                            ).length > 0;
-                        const left =
-                            this.boxes.filter(
-                                other => other.vertex.y == y && other.vertex.x == x + 1 && other.vertex.z == z
-                            ).length > 0;
-                        const right =
-                            this.boxes.filter(
-                                other => other.vertex.y == y && other.vertex.x == x - 1 && other.vertex.z == z
-                            ).length > 0;
-                        const back =
-                            this.boxes.filter(
-                                other => other.vertex.y == y && other.vertex.x == x && other.vertex.z == z + 1
-                            ).length > 0;
-                        const front =
-                            this.boxes.filter(
-                                other => other.vertex.y == y && other.vertex.x == x && other.vertex.z == z - 1
-                            ).length > 0;
-                        if (front && back && up && down && left && right) {
-                            totalFree -= 6;
-                        }
-                    }
-                }
-            }
+        // for (let x = minX; x < maxX; x++) {
+        //     for (let y = minY; y < maxY; y++) {
+        //         for (let z = minZ; z < maxZ; z++) {
+        for (const box of this.boxes) {
+            // const boxAt = this.boxes.filter(b => {
+            //     return b.vertex.x == x && b.vertex.y == y && b.vertex.z == z;
+            // });
+            // const isBoxAt = boxAt.length === 1;
+
+            // if (isBoxAt) {
+            // if (boxAt[0].free.up) {
+            // test if any other boxes are "above" this one.
+            box.exterior.up =
+                this.boxes.filter(b => {
+                    return b.vertex.x == box.vertex.x && b.vertex.y < box.vertex.y && b.vertex.z == box.vertex.z;
+                }).length > 0;
+
+            box.exterior.down =
+                this.boxes.filter(b => {
+                    return b.vertex.x == box.vertex.x && b.vertex.y > box.vertex.y && b.vertex.z == box.vertex.z;
+                }).length > 0;
+            box.exterior.left =
+                this.boxes.filter(b => {
+                    return b.vertex.x < box.vertex.x && b.vertex.y == box.vertex.y && b.vertex.z == box.vertex.z;
+                }).length > 0;
+            box.exterior.right =
+                this.boxes.filter(b => {
+                    return b.vertex.x > box.vertex.x && b.vertex.y == box.vertex.y && b.vertex.z == box.vertex.z;
+                }).length > 0;
+
+            box.exterior.front =
+                this.boxes.filter(b => {
+                    return b.vertex.x == box.vertex.x && b.vertex.y == box.vertex.y && b.vertex.z < box.vertex.z;
+                }).length > 0;
+            box.exterior.back =
+                this.boxes.filter(b => {
+                    return b.vertex.x == box.vertex.x && b.vertex.y == box.vertex.y && b.vertex.z > box.vertex.z;
+                }).length > 0;
+            // }
+
+            totalFree -= box.exterior.up ? 1 : 0;
+            totalFree -= box.exterior.down ? 1 : 0;
+            totalFree -= box.exterior.left ? 1 : 0;
+            totalFree -= box.exterior.right ? 1 : 0;
+            totalFree -= box.exterior.back ? 1 : 0;
+            totalFree -= box.exterior.front ? 1 : 0;
+            // }
         }
+        //         }
+        //     }
+        // }
 
         return totalFree;
     }

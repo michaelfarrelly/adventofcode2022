@@ -125,7 +125,7 @@ class Piece {
     location: Position;
 }
 class Field {
-    tallestPiece: number;
+    tallestPiece = -1;
     constructor(options: FieldOptions) {
         // this.rows = [];
         // this.buildRows(options);

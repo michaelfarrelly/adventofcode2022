@@ -58,6 +58,10 @@ class Monkey {
         if (this.op == "*") {
             return this.valueA * this.valueB;
         }
+        if (this.op == "=") {
+            window.console.log(`root`, this.valueA, this.valueB);
+            return this.valueA == this.valueB ? 1 : 0;
+        }
 
         return -1;
     }
@@ -76,13 +80,7 @@ class Model {
             if (monkeyN.watchB === updatedMonkey.name) {
                 monkeyN.valueB = updatedMonkey.value;
             }
-            if (monkeyN.isComplete() && !monkeyN.processed) {
-                window.console.log(`monkey is complete`, monkeyN);
-                monkeyN.value = monkeyN.evalOp();
-                monkeyN.processed = true;
-                // now iterate other monkies.
-                this.updateMonkies(monkeys, monkeyN);
-            }
+            this.checkComplete(monkeys, monkeyN);
         }
     }
 
@@ -96,21 +94,6 @@ class Model {
             seenMonkey.push(monkey);
             if (monkey.value) {
                 monkeysWithValue.push(monkey);
-                // look at previous and fill in values.
-                // for (let n = 0; n < m; n++) {
-                //     const monkeyN = monkeys[n];
-                //     if (monkeyN.watchA === monkey.name) {
-                //         monkeyN.valueA = monkey.value;
-                //     }
-                //     if (monkeyN.watchB === monkey.name) {
-                //         monkeyN.valueB = monkey.value;
-                //     }
-                //     if (monkeyN.isComplete()) {
-                //         window.console.log(`monkey is complete`, monkeyN);
-                //         monkeyN.value = monkeyN.evalOp();
-                //         // now iterate other monkies.
-                //     }
-                // }
                 this.updateMonkies(seenMonkey, monkey);
             } else {
                 // not sure?
@@ -138,6 +121,66 @@ class Model {
 
         return monkeys.filter(x => x.name === "root")[0].evalOp();
     }
+
+    processPart2(lines: string[]): number {
+        for (let h = 55879027929; h < 55879027929 + 50; h++) {
+            const monkeys = lines.map(l => {
+                if (l.startsWith("humn")) {
+                    // ignore the value - we need to make root pass
+                    return new Monkey(`humn: ${h}`);
+                } else if (l.startsWith("root")) {
+                    return new Monkey(l.replace("+", "="));
+                }
+                return new Monkey(l);
+            });
+
+            const seenMonkey: Monkey[] = [];
+            for (let m = 0; m < monkeys.length; m++) {
+                const monkey = monkeys[m];
+                seenMonkey.push(monkey);
+                if (monkey.value) {
+                    this.updateMonkies(seenMonkey, monkey);
+                } else {
+                    // not sure?
+                    // has seen monkeys have values yet?
+                    const maybeWatchA = seenMonkey.filter(x => x.name == monkey.watchA);
+                    const maybeWatchB = seenMonkey.filter(x => x.name == monkey.watchB);
+                    if (maybeWatchA.length > 0) {
+                        if (maybeWatchA[0].value) {
+                            monkey.valueA = maybeWatchA[0].value;
+                        }
+                        if (maybeWatchA[0].processed) {
+                            monkey.valueA = maybeWatchA[0].evalOp();
+                        }
+                    }
+                    if (maybeWatchB.length > 0) {
+                        if (maybeWatchB[0].value) {
+                            monkey.valueB = maybeWatchB[0].value;
+                        }
+                        if (maybeWatchB[0].processed) {
+                            monkey.valueB = maybeWatchB[0].evalOp();
+                        }
+                    }
+                    this.checkComplete(monkeys, monkey);
+                }
+            }
+            window.console.log(`round ${h}`);
+            if (monkeys.filter(x => x.name === "root")[0].evalOp() == 1) {
+                return h;
+            }
+        }
+        return -1;
+    }
+
+    checkComplete(monkeys: Monkey[], monkey: Monkey): void {
+        if (monkey.isComplete() && !monkey.processed) {
+            // window.console.log(`monkey is complete`, monkey);
+            monkey.value = monkey.evalOp();
+            monkey.processed = true;
+            // now iterate other monkies.
+            this.updateMonkies(monkeys, monkey);
+        }
+    }
 }
 
 const testData =
@@ -155,8 +198,9 @@ export function Day21() {
 
     const onRunPart2 = React.useCallback(() => {
         const lines = input.split("\n");
+        const result = new Model().processPart2(lines);
 
-        setResult(`Total Score: ${lines}`);
+        setResult(`Total Score: ${result}`);
     }, [input]);
 
     return (
