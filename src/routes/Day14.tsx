@@ -2,14 +2,163 @@ import { useState } from "react";
 import "./App.css";
 import styles from "./App.module.css";
 import React from "react";
+import { flatten, sort } from "ramda";
 /*
 
-Description goes here
+https://adventofcode.com/2022/day/14
 
 */
 
-const testData =
-    "    [D]    \n[N] [C]    \n[Z] [M] [P]\n 1   2   3 \n\nmove 1 from 2 to 1\nmove 3 from 1 to 3\nmove 2 from 2 to 1\nmove 1 from 1 to 2";
+class Position {
+    constructor(position: [number, number] | number[]) {
+        this.position = position as [number, number];
+    }
+    position: [number, number];
+}
+
+function position(position: [number, number] | number[]): Position {
+    return new Position(position);
+}
+function add(a: Position, b: Position): Position {
+    const newA = [...a.position];
+
+    // window.console.log(`add`, a.position, b.position);
+    newA[0] += b.position[0];
+    newA[1] += b.position[1];
+    return position(newA);
+}
+
+function fillLine(a: Position, b: Position): Position[] {
+    const items: Position[] = [];
+
+    // "498,4 -> 498,6 -> 496,6\n503,4 -> 502,4 -> 502,9 -> 494,9"
+    const deltaX = b.position[0] - a.position[0]; // 498 - 498 = 0,  502 - 494 = 8
+    const deltaY = b.position[1] - a.position[1];
+    const delta = position([deltaX > 0 ? 1 : deltaX < 0 ? -1 : 0, deltaY > 0 ? 1 : deltaY < 0 ? -1 : 0]);
+    const itemCount = Math.abs(deltaX != 0 ? deltaX : deltaY);
+
+    let current = a;
+    items.push(current);
+    for (let i = 0; i < itemCount; i++) {
+        current = add(current, delta);
+        items.push(current);
+    }
+
+    // window.console.log(`fillLine`, a, b, delta, itemCount, items);
+    return items;
+}
+
+class Model {
+    solidItems: Position[] = [];
+    sandItems: Position[] = [];
+    process(lines: string[]): number {
+        const parsedLines = lines.map(line => {
+            // "498,4 -> 498,6 -> 496,6\n503,4 -> 502,4 -> 502,9 -> 494,9"
+            return line.split(" -> ").map(p => position(p.split(",").map(p2 => parseInt(p2))));
+        });
+        // lineParts has array of array of positions.
+
+        window.console.log(`line parts`, parsedLines);
+        const pourLocation: Position = position([500, 0]);
+        this.solidItems = flatten(
+            parsedLines.map(line => {
+                const solids: Position[] = [];
+                for (let i = 0; i < line.length - 1; i++) {
+                    solids.push(...fillLine(line[i], line[i + 1]));
+                }
+                return solids;
+            })
+        );
+
+        const bottomY = this.solidItems.reduce((p, c) => {
+            if (c.position[1] > p) {
+                return c.position[1];
+            } else {
+                return p;
+            }
+        }, 0);
+        this.sandItems = [];
+
+        let activeItem: Position = position([500, 0]);
+        let itemCount = 0;
+        window.console.log(`init`, this.solidItems, bottomY);
+        let finished = false;
+
+        for (let i = 0; i < 1200; i++) {
+            // start item at pourLocation
+            window.console.log(`i`, i);
+            activeItem = add(pourLocation, position([0, 0]));
+            for (let n = 0; n < 200; n++) {
+                const nextLocation = add(activeItem, position([0, 1]));
+                window.console.log(`m`, n, nextLocation);
+                if (this.isSolid(nextLocation)) {
+                    // check left or right
+                    const nextLocationLeft = add(nextLocation, position([-1, 0]));
+                    const nextLocationRight = add(nextLocation, position([1, 0]));
+                    if (!this.isSolid(nextLocationLeft)) {
+                        activeItem = nextLocationLeft;
+                    } else if (!this.isSolid(nextLocationRight)) {
+                        activeItem = nextLocationRight;
+                    } else {
+                        itemCount++;
+                        this.sandItems.push(position(activeItem.position));
+                        // stop this activeItem.
+                        break;
+                    }
+                } else if (nextLocation.position[1] > bottomY) {
+                    // stop this activeItem.
+                    window.console.log(`finished item `, n);
+                    finished = true;
+                    break;
+                } else {
+                    activeItem = nextLocation;
+                }
+            }
+
+            if (finished) {
+                break;
+            }
+        }
+
+        return itemCount;
+    }
+    isSolid(pos: Position): boolean {
+        return (
+            this.solidItems.filter(p => p.position[0] == pos.position[0] && p.position[1] == pos.position[1]).length >
+                0 ||
+            this.sandItems.filter(p => p.position[0] == pos.position[0] && p.position[1] == pos.position[1]).length > 0
+        );
+    }
+    isSand(pos: Position): boolean {
+        return (
+            this.sandItems.filter(p => p.position[0] == pos.position[0] && p.position[1] == pos.position[1]).length > 0
+        );
+    }
+    drawMap(): string {
+        let result = `Solid Item count: ${this.solidItems.length}, ${this.sandItems.length}\n\n`;
+
+        const allItems = [...this.solidItems, ...this.sandItems];
+        const sortedX = sort((a, b) => a.position[0] - b.position[0], allItems);
+        const sortedY = sort((a, b) => a.position[1] - b.position[1], allItems);
+
+        window.console.log(`sorted`, sortedX, sortedY);
+        const minX = sortedX[0].position[0];
+        const maxX = sortedX[sortedX.length - 1].position[0];
+        const minY = sortedY[0].position[1];
+        const maxY = sortedY[sortedY.length - 1].position[1];
+
+        for (let y = minY; y <= maxY; y++) {
+            for (let x = minX; x <= maxX; x++) {
+                result += this.isSand(position([x, y])) ? "O" : this.isSolid(position([x, y])) ? "#" : ".";
+            }
+            result += "\n";
+        }
+
+        return result;
+    }
+}
+
+const testData = "498,4 -> 498,6 -> 496,6\n503,4 -> 502,4 -> 502,9 -> 494,9";
 
 export function Day14() {
     const [input, setInput] = useState<string>(testData);
@@ -17,8 +166,9 @@ export function Day14() {
 
     const onRunPart1 = React.useCallback(() => {
         const lines = input.split("\n");
-
-        setResult(`Total Score: ${lines}`);
+        const model = new Model();
+        const result = model.process(lines);
+        setResult(`Total Score: ${result}\n\n${model.drawMap()}`);
     }, [input]);
 
     const onRunPart2 = React.useCallback(() => {
