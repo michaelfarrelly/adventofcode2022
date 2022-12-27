@@ -10,6 +10,10 @@ https://adventofcode.com/2022/day/14
 */
 
 class Position {
+    copy(next: Position) {
+        this.position[0] = next.position[0];
+        this.position[1] = next.position[1];
+    }
     constructor(position: [number, number] | number[]) {
         this.position = position as [number, number];
     }
@@ -20,12 +24,12 @@ function position(position: [number, number] | number[]): Position {
     return new Position(position);
 }
 function add(a: Position, b: Position): Position {
-    const newA = [...a.position];
+    const newA = position([a.position[0], a.position[1]]);
 
     // window.console.log(`add`, a.position, b.position);
-    newA[0] += b.position[0];
-    newA[1] += b.position[1];
-    return position(newA);
+    newA.position[0] += b.position[0];
+    newA.position[1] += b.position[1];
+    return newA;
 }
 
 function fillLine(a: Position, b: Position): Position[] {
@@ -51,7 +55,9 @@ function fillLine(a: Position, b: Position): Position[] {
 class Model {
     solidItems: Position[] = [];
     sandItems: Position[] = [];
-    process(lines: string[]): number {
+    bottomY = 0;
+
+    init({ lines, bottomOffset }: { lines: string[]; bottomOffset: number }): void {
         const parsedLines = lines.map(line => {
             // "498,4 -> 498,6 -> 496,6\n503,4 -> 502,4 -> 502,9 -> 494,9"
             return line.split(" -> ").map(p => position(p.split(",").map(p2 => parseInt(p2))));
@@ -59,7 +65,6 @@ class Model {
         // lineParts has array of array of positions.
 
         window.console.log(`line parts`, parsedLines);
-        const pourLocation: Position = position([500, 0]);
         this.solidItems = flatten(
             parsedLines.map(line => {
                 const solids: Position[] = [];
@@ -70,18 +75,24 @@ class Model {
             })
         );
 
-        const bottomY = this.solidItems.reduce((p, c) => {
-            if (c.position[1] > p) {
-                return c.position[1];
-            } else {
-                return p;
-            }
-        }, 0);
+        this.bottomY =
+            this.solidItems.reduce((p, c) => {
+                if (c.position[1] > p) {
+                    return c.position[1];
+                } else {
+                    return p;
+                }
+            }, 0) + bottomOffset; // +2 is for part2
         this.sandItems = [];
+    }
+
+    process(lines: string[]): number {
+        const pourLocation: Position = position([500, 0]);
+        this.init({ lines, bottomOffset: 0 });
 
         let activeItem: Position = position([500, 0]);
         let itemCount = 0;
-        window.console.log(`init`, this.solidItems, bottomY);
+        window.console.log(`init`, this.solidItems, this.bottomY);
         let finished = false;
 
         for (let i = 0; i < 1200; i++) {
@@ -105,7 +116,7 @@ class Model {
                         // stop this activeItem.
                         break;
                     }
-                } else if (nextLocation.position[1] > bottomY) {
+                } else if (nextLocation.position[1] > this.bottomY) {
                     // stop this activeItem.
                     window.console.log(`finished item `, n);
                     finished = true;
@@ -119,6 +130,60 @@ class Model {
                 break;
             }
         }
+
+        return itemCount;
+    }
+    processPart2(lines: string[]): number {
+        const pourLocation: Position = position([500, 0]);
+        this.init({ lines, bottomOffset: 2 });
+
+        let activeItem: Position = position([500, 0]);
+        let itemCount = 0;
+        window.console.log(`init`, this.solidItems, this.bottomY);
+        let finished = false;
+
+        // for (let i = 0; i < 5000; i++) {
+        let i = 1;
+        do {
+            // start item at pourLocation
+            if (i % 100 == 0) {
+                window.console.log(`[${i}]`, i);
+            }
+
+            activeItem = add(pourLocation, position([0, 0]));
+            if (this.isSolid(pourLocation)) {
+                finished = true;
+                break;
+            } else {
+                for (let n = 0; n < 200; n++) {
+                    const nextLocation = add(activeItem, position([0, 1]));
+                    if (this.isSolid(nextLocation)) {
+                        // check left or right
+                        const nextLocationLeft = add(nextLocation, position([-1, 0]));
+                        const nextLocationRight = add(nextLocation, position([1, 0]));
+                        if (!this.isSolid(nextLocationLeft)) {
+                            activeItem.copy(nextLocationLeft);
+                        } else if (!this.isSolid(nextLocationRight)) {
+                            activeItem.copy(nextLocationRight);
+                        } else {
+                            itemCount++;
+                            this.sandItems.push(position(activeItem.position));
+                            // stop this activeItem.
+                            break;
+                        }
+                    } else if (nextLocation.position[1] == this.bottomY) {
+                        // stop this activeItem.
+                        itemCount++;
+                        this.sandItems.push(position(activeItem.position));
+
+                        break;
+                    } else {
+                        activeItem.copy(nextLocation);
+                    }
+                }
+            }
+            i++;
+        } while (!finished);
 
         return itemCount;
     }
@@ -173,8 +238,9 @@ export function Day14() {
 
     const onRunPart2 = React.useCallback(() => {
         const lines = input.split("\n");
-
-        setResult(`Total Score: ${lines}`);
+        const model = new Model();
+        const result = model.processPart2(lines);
+        setResult(`Total Score: ${result}\n\n${model.drawMap()}`);
     }, [input]);
 
     return (
